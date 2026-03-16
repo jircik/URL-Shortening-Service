@@ -1,0 +1,8 @@
+### Create a Short Url
+POST http://localhost:3000/shorten
+Content-Type: application/json
+
+{
+  "longUrl":  "https://docs.google.com/document/d/1ba1dwgxxx9_ctvXCfRSgjcpFUR0gJCeWzR0BZsqv3dg/edit?tab=t.0",
+  "shortCode": "Optional"
+}
