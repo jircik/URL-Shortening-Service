@@ -4,7 +4,7 @@ import { customAlphabet } from 'nanoid';
 const alphabet = '0123456789abcdef'
 const generateShortCode = customAlphabet(alphabet, 10);
 
-const baseUrl = "http://localhost:3000"
+const baseUrl = process.env.BASE_URL || "http://localhost:3000"
 
 
 class ShortUrlController {
@@ -53,6 +53,37 @@ class ShortUrlController {
                 message:'Server Error',
                 error: err.message //use only in dev
             });
+        }
+    }
+
+    static async redirectFromShortUrl(req, res) {
+        const { shortCode } = req.params;
+
+        try{
+
+            const shortUrlDoc = await ShortUrl.findOneAndUpdate(
+                { shortCode: shortCode },
+                { $inc: {accessCount: 1}},
+                {
+                    new: true,
+                    projection: { longUrl: 1, isActive: 1 }
+                }
+            );
+
+            if (!shortUrlDoc) {
+                return res.status(404).json({message:"Url not found"});
+            }
+
+            if (shortUrlDoc.active === false){
+                return res.status(410).json({message:"Url is not active"}); //future: fallback page for expired links
+            }
+
+            return res.redirect(301, shortUrlDoc.longUrl);
+
+        } catch (err){
+            console.error("Erro no redirect:", err);
+
+            //return res.status(500).json({ message: "Internal Server error" }); only in prod
         }
     }
 }
