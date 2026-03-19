@@ -3,8 +3,8 @@ POST http://localhost:3000/shorten
 Content-Type: application/json
 
 {
-  "longUrl":  "https://docs.google.com/document/d/1ba1dwgxxx9_ctvXCfRSgjcpFUR0gJCeWzR0BZsqv3dg/edit?tab=t.0",
-  "shortCode": "optional"
+  "longUrl":  "longUrl",
+  "shortCode": "(Optional) shortCode, (will be created automatically if empty)"
 }
 
 ### Redirect to short Url
@@ -22,4 +22,14 @@ Content-Type: application/json
 
 {
   "isActive": "boolean"
+}
+
+### Update ShortUrl
+
+PUT http://localhost:3000/update/{id}
+Content-Type: application/json
+
+{
+  "shortCode": "(Optional) new shortCode",
+  "longUrl": "(Optional) new longUrl"
 }

@@ -107,7 +107,7 @@ class ShortUrlController {
         }
     }
 
-    static async toggleState(req, res) {
+    static async updateState(req, res) {
         const { id } = req.params;
 
         if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -150,6 +150,61 @@ class ShortUrlController {
             //return res.status(500).json({ message: "Internal Server error" }); only in prod
         }
 
+    }
+
+    static async updateShortUrl(req, res) {
+        const { id } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({message: "Invalid ID format"});
+        }
+
+        const { shortCode, longUrl } = req.body;
+
+        if (shortCode === undefined && longUrl === undefined) {
+            return res.status(400).json({message: "ShortCode or longUrl is required"});
+        }
+
+        const updateData = {};
+
+        if (longUrl !== undefined){
+            try {
+                if (typeof longUrl !== 'string' || longUrl.trim() === '') {
+                    return res.status(400).json({ message: "The LongUrl is not a valid URL" });
+                }
+                new URL(longUrl);
+            } catch (e) {
+                return res.status(400).json({message: 'The LongUrl is not a valid URL'});
+            }
+            updateData.longUrl = longUrl;
+        }
+
+        if (shortCode !== undefined){
+            if (typeof shortCode !== 'string' || shortCode.trim() === '') {
+                return res.status(400).json({ message: "ShortCode must be a non-empty string" });
+            }
+            updateData.shortCode = shortCode.trim();
+        }
+
+        try{
+            const updatedUrl = await ShortUrl.findByIdAndUpdate(
+                id,
+                updateData,
+                {new: true, runValidators: true}
+            )
+
+            if(updatedUrl === null){
+                return res.status(404).json({message:"Url not found"});
+            }
+
+            return res.status(200).json({message:"shortUrl updated"});
+        } catch (err){
+            if (err.code === 11000) {
+                return res.status(409).json({ message: "This shortCode is already in use" });
+            }
+
+            return res.status(500).json({ message: "Internal Server Error" });
+        }
     }
 }
 
