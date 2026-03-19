@@ -86,6 +86,25 @@ class ShortUrlController {
             //return res.status(500).json({ message: "Internal Server error" }); only in prod
         }
     }
+
+    static async getDetails(req, res) {
+        const { shortCode } = req.params;
+
+        try {
+            const shortUrlDetails = await ShortUrl.findOne({shortCode: shortCode});
+
+            if (!shortUrlDetails) {
+                return res.status(404).json({message: "Url not found"});
+            }
+
+            return res.status(200).json({
+                shortUrlDetails,
+            })
+        }catch(err){
+            console.error("Error getting details:", err);
+            //return res.status(500).json({ message: "Internal Server error" }); only in prod
+        }
+    }
 }
 
 export default ShortUrlController;

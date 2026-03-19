@@ -10,3 +10,7 @@ Content-Type: application/json
 ### Redirect to short Url
 
 GET http://localhost:3000/{shortCode}
+
+### Get details
+
+GET http://localhost:3000/details/{shortCode}
