@@ -1,5 +1,6 @@
 import ShortUrl from "../model/shortUrl.js";
 import { customAlphabet } from 'nanoid';
+import mongoose from "mongoose";
 
 const alphabet = '0123456789abcdef'
 const generateShortCode = customAlphabet(alphabet, 10);
@@ -104,6 +105,51 @@ class ShortUrlController {
             console.error("Error getting details:", err);
             //return res.status(500).json({ message: "Internal Server error" }); only in prod
         }
+    }
+
+    static async toggleState(req, res) {
+        const { id } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({message: "Invalid ID format"});
+        }
+
+        const { isActive } = req.body;
+
+        if (isActive === undefined) {
+            return res.status(400).json({message: "O campo 'isActive' é obrigatório no body"});
+        }
+
+        if (typeof isActive !== "boolean") {
+            return res.status(400).json({message:"IsActive field must be a boolean"});
+        }
+
+        try{
+            const doc = await ShortUrl.findById(id);
+
+            if(!doc){
+                return res.status(404).json({message:"Url not found"});
+            }
+
+            if(doc.isActive === isActive){
+                return res.status(200).json({message:"Url State is already as desired"});
+            }
+
+            const updatedDoc = await ShortUrl.findByIdAndUpdate(
+                id,
+                {isActive: isActive},
+                {new: true}
+            );
+            return res.status(200).json({
+                message:"Url State updated",
+                shortUrl: updatedDoc
+            });
+
+        } catch (err){
+            console.error("Error updating Url state:", err);
+            //return res.status(500).json({ message: "Internal Server error" }); only in prod
+        }
+
     }
 }
 

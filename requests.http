@@ -14,3 +14,12 @@ GET http://localhost:3000/{shortCode}
 ### Get details
 
 GET http://localhost:3000/details/{shortCode}
+
+### Toggle Url State
+
+PATCH http://localhost:3000/state/{id}
+Content-Type: application/json
+
+{
+  "isActive": "boolean"
+}
