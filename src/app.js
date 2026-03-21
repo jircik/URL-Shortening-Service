@@ -1,6 +1,8 @@
 import express from 'express';
+import swaggerUi from 'swagger-ui-express';
 import connectToDB from "./config/database.js";
 import routes from "./routes/index.js";
+import swaggerSpec from "./config/swagger.js";
 
 const connection = await connectToDB();
 
@@ -13,6 +15,7 @@ connection.once('open', () => {
 })
 
 const app = express();
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 routes(app);
 
 
