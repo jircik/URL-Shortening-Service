@@ -1,5 +1,5 @@
 ### Create a Short Url
-POST http://localhost:3000/shorten
+POST {{baseUrl}}/shorten
 Content-Type: application/json
 
 {
@@ -9,15 +9,15 @@ Content-Type: application/json
 
 ### Redirect to short Url
 
-GET http://localhost:3000/{shortCode}
+GET {{baseUrl}}/{shortCode}
 
 ### Get details
 
-GET http://localhost:3000/details/{shortCode}
+GET {{baseUrl}}/details/{shortCode}
 
 ### Toggle Url State
 
-PATCH http://localhost:3000/state/{id}
+PATCH {{baseUrl}}/state/{id}
 Content-Type: application/json
 
 {
@@ -26,7 +26,7 @@ Content-Type: application/json
 
 ### Update ShortUrl
 
-PUT http://localhost:3000/update/{id}
+PUT {{baseUrl}}/update/{id}
 Content-Type: application/json
 
 {
