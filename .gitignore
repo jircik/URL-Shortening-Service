@@ -4,3 +4,4 @@ node_modules/
 .env.*
 !.env.example
 .idea/
+http-client.env.json
