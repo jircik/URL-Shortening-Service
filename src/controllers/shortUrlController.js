@@ -10,7 +10,7 @@ const baseUrl = process.env.BASE_URL || "http://localhost:3000"
 
 class ShortUrlController {
 
-    static async createShortUrl(req, res) {
+    static async createShortUrl(req, res, next) {
         const {longUrl, shortCode} = req.body;
 
         if (!longUrl) {
@@ -49,15 +49,11 @@ class ShortUrlController {
             if (err.code === 11000) {
                 return res.status(409).json({message:"Short Url already exists"});
             }
-            console.error(err);
-            return res.status(500).json({
-                message:'Server Error',
-                error: err.message //use only in dev
-            });
+            return next(err);
         }
     }
 
-    static async redirectFromShortUrl(req, res) {
+    static async redirectFromShortUrl(req, res, next) {
         const { shortCode } = req.params;
 
         try{
@@ -75,20 +71,18 @@ class ShortUrlController {
                 return res.status(404).json({message:"Url not found"});
             }
 
-            if (shortUrlDoc.active === false){
+            if (shortUrlDoc.isActive === false){
                 return res.status(410).json({message:"Url is not active"}); //future: fallback page for expired links
             }
 
             return res.redirect(301, shortUrlDoc.longUrl);
 
         } catch (err){
-            console.error("Erro no redirect:", err);
-
-            //return res.status(500).json({ message: "Internal Server error" }); only in prod
+            return next(err);
         }
     }
 
-    static async getDetails(req, res) {
+    static async getDetails(req, res, next) {
         const { shortCode } = req.params;
 
         try {
@@ -102,12 +96,11 @@ class ShortUrlController {
                 shortUrlDetails,
             })
         }catch(err){
-            console.error("Error getting details:", err);
-            //return res.status(500).json({ message: "Internal Server error" }); only in prod
+            return next(err);
         }
     }
 
-    static async updateState(req, res) {
+    static async updateState(req, res, next) {
         const { id } = req.params;
 
         if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -117,7 +110,7 @@ class ShortUrlController {
         const { isActive } = req.body;
 
         if (isActive === undefined) {
-            return res.status(400).json({message: "O campo 'isActive' é obrigatório no body"});
+            return res.status(400).json({message: "The 'isActive' field is required in the body"});
         }
 
         if (typeof isActive !== "boolean") {
@@ -146,13 +139,12 @@ class ShortUrlController {
             });
 
         } catch (err){
-            console.error("Error updating Url state:", err);
-            //return res.status(500).json({ message: "Internal Server error" }); only in prod
+            return next(err);
         }
 
     }
 
-    static async updateShortUrl(req, res) {
+    static async updateShortUrl(req, res, next) {
         const { id } = req.params;
 
         if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -203,7 +195,7 @@ class ShortUrlController {
                 return res.status(409).json({ message: "This shortCode is already in use" });
             }
 
-            return res.status(500).json({ message: "Internal Server Error" });
+            return next(err);
         }
     }
 }

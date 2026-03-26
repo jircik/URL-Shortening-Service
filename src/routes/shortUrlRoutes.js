@@ -1,5 +1,12 @@
 import express from 'express';
 import ShortUrlController from '../controllers/shortUrlController.js';
+import rateLimit from "express-rate-limit";
+
+const writeLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 20,
+    message: {message: 'Too many requests, please try again later'},
+})
 
 const routes = express.Router();
 
@@ -65,7 +72,7 @@ const routes = express.Router();
  *       500:
  *         description: Internal server error
  */
-routes.post("/shorten", ShortUrlController.createShortUrl);
+routes.post("/shorten", writeLimiter, ShortUrlController.createShortUrl);
 
 /**
  * @openapi
@@ -199,7 +206,7 @@ routes.get("/:shortCode", ShortUrlController.redirectFromShortUrl);
  *               invalidId:
  *                 value: { message: Invalid ID format }
  *               missingField:
- *                 value: { message: "O campo 'isActive' é obrigatório no body" }
+ *                 value: { message: "The field 'isActive' is required in the body" }
  *               invalidType:
  *                 value: { message: IsActive field must be a boolean }
  *       404:
@@ -211,7 +218,7 @@ routes.get("/:shortCode", ShortUrlController.redirectFromShortUrl);
  *             example:
  *               message: Url not found
  */
-routes.patch("/state/:id", ShortUrlController.updateState);
+routes.patch("/state/:id", writeLimiter, ShortUrlController.updateState);
 
 /**
  * @openapi
@@ -290,6 +297,6 @@ routes.patch("/state/:id", ShortUrlController.updateState);
  *             example:
  *               message: Internal Server Error
  */
-routes.put("/update/:id", ShortUrlController.updateShortUrl);
+routes.put("/update/:id", writeLimiter, ShortUrlController.updateShortUrl);
 
 export default routes;
