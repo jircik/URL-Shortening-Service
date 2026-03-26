@@ -3,7 +3,7 @@ POST {{baseUrl}}/shorten
 Content-Type: application/json
 
 {
-  "longUrl":  "longUrl",
+  "longUrl": "longUrl",
   "shortCode": "(Optional) shortCode, (will be created automatically if empty)"
 }
 
@@ -33,3 +33,27 @@ Content-Type: application/json
   "shortCode": "(Optional) new shortCode",
   "longUrl": "(Optional) new longUrl"
 }
+
+### ── AUTH ──────────────────────────────────────────
+
+### Register
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "email",
+  "password": "password"
+}
+
+### Login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "email",
+  "password": "password"
+}
+
+### Get current user (requires Authorization header)
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {token}

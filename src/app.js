@@ -5,6 +5,7 @@ import routes from "./routes/index.js";
 import swaggerSpec from "./config/swagger.js";
 import cors from "cors";
 import rateLimit from "express-rate-limit";
+import { attachUser } from "./middleware/auth.js";
 
 const connection = await connectToDB();
 
@@ -26,6 +27,8 @@ app.use(cors({
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
 }));
+
+app.use(attachUser);
 
 const globalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, //15 minutes
