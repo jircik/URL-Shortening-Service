@@ -6,3 +6,4 @@ node_modules/
 .idea/
 http-client.env.json
 /.claude/
+dev.http
