@@ -1,6 +1,7 @@
 import express from 'express';
 import ShortUrlController from '../controllers/shortUrlController.js';
 import rateLimit from "express-rate-limit";
+import { requireAuth } from "../middleware/auth.js";
 
 const writeLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
@@ -113,6 +114,81 @@ routes.get("/details/:shortCode", ShortUrlController.getDetails); // before "/:s
 
 /**
  * @openapi
+ * /urls:
+ *   get:
+ *     summary: List authenticated user's URLs
+ *     description: Returns a paginated list of short URLs created by the authenticated user.
+ *     tags:
+ *       - Short URLs
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Results per page (max 100)
+ *       - in: query
+ *         name: sort
+ *         schema:
+ *           type: string
+ *           enum: [createdAt, accessCount]
+ *           default: createdAt
+ *         description: Field to sort by
+ *       - in: query
+ *         name: order
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *           default: desc
+ *         description: Sort direction
+ *     responses:
+ *       200:
+ *         description: Paginated list of URLs
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/ShortUrl'
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     total:
+ *                       type: integer
+ *                       example: 42
+ *                     page:
+ *                       type: integer
+ *                       example: 1
+ *                     limit:
+ *                       type: integer
+ *                       example: 10
+ *                     totalPages:
+ *                       type: integer
+ *                       example: 5
+ *       401:
+ *         description: Not authenticated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorMessage'
+ *             example:
+ *               message: Authentication required
+ */
+routes.get("/urls", requireAuth, ShortUrlController.listUrls); // before "/:shortcode" so router don't mistake it as a shortCode
+
+/**
+ * @openapi
  * /{shortCode}:
  *   get:
  *     summary: Redirect to original URL
@@ -218,7 +294,7 @@ routes.get("/:shortCode", ShortUrlController.redirectFromShortUrl);
  *             example:
  *               message: Url not found
  */
-routes.patch("/state/:id", writeLimiter, ShortUrlController.updateState);
+routes.patch("/state/:id", writeLimiter, requireAuth, ShortUrlController.updateState);
 
 /**
  * @openapi
@@ -297,6 +373,6 @@ routes.patch("/state/:id", writeLimiter, ShortUrlController.updateState);
  *             example:
  *               message: Internal Server Error
  */
-routes.put("/update/:id", writeLimiter, ShortUrlController.updateShortUrl);
+routes.put("/update/:id", writeLimiter, requireAuth, ShortUrlController.updateShortUrl);
 
 export default routes;

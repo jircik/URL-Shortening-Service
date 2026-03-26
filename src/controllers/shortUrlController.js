@@ -11,7 +11,7 @@ const baseUrl = process.env.BASE_URL || "http://localhost:3000"
 class ShortUrlController {
 
     static async createShortUrl(req, res, next) {
-        const {longUrl, shortCode} = req.body;
+        const { longUrl, shortCode, duration } = req.body;
 
         if (!longUrl) {
             return res.status(400).json({message: 'longUrl is required'});
@@ -33,15 +33,28 @@ class ShortUrlController {
                 finalShortCode = generateShortCode();
             }
 
+            let createdBy = null;
+            let expiresAt;
+
+            if (req.user) {
+                createdBy = req.user.userId;
+                expiresAt = duration ? new Date(Date.now() + duration * 60 * 60 * 1000) : null;
+            } else {
+                expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+            }
+
             const newShortUrl = await ShortUrl.create({
                 longUrl,
-                shortCode: finalShortCode
+                shortCode: finalShortCode,
+                createdBy,
+                expiresAt,
             });
 
             return res.status(200).json({
                 message: 'shortUrl created successfully',
                 shortUrl: newShortUrl,
-                newUrl: `${baseUrl}/${newShortUrl.shortCode}`
+                newUrl: `${baseUrl}/${newShortUrl.shortCode}`,
+                expiresAt: newShortUrl.expiresAt,
             });
 
         } catch (err){
@@ -63,7 +76,7 @@ class ShortUrlController {
                 { $inc: {accessCount: 1}},
                 {
                     new: true,
-                    projection: { longUrl: 1, isActive: 1 }
+                    projection: { longUrl: 1, isActive: 1, expiresAt: 1 }
                 }
             );
 
@@ -73,6 +86,10 @@ class ShortUrlController {
 
             if (shortUrlDoc.isActive === false){
                 return res.status(410).json({message:"Url is not active"}); //future: fallback page for expired links
+            }
+
+            if(shortUrlDoc.expiresAt && shortUrlDoc.expiresAt < new Date()){
+                return res.status(410).json({message:"This shortUrl expired"});
             }
 
             return res.redirect(301, shortUrlDoc.longUrl);
@@ -122,6 +139,10 @@ class ShortUrlController {
 
             if(!doc){
                 return res.status(404).json({message:"Url not found"});
+            }
+
+            if (doc.createdBy?.toString() !== req.user.userId) {
+                return res.status(403).json({ message: 'You do not own this URL' });
             }
 
             if(doc.isActive === isActive){
@@ -179,6 +200,17 @@ class ShortUrlController {
         }
 
         try{
+
+            const doc = await ShortUrl.findById(id);
+
+            if(!doc){
+                return res.status(404).json({message:"Url not found"});
+            }
+
+            if(doc.createdBy?.toString() !== req.user.userId){
+                return res.status(403).json({message:"You do not own this Url"});
+            }
+
             const updatedUrl = await ShortUrl.findByIdAndUpdate(
                 id,
                 updateData,
@@ -198,6 +230,45 @@ class ShortUrlController {
             return next(err);
         }
     }
+
+    static async listUrls(req, res, next) {
+
+        try{
+            let { page = 1, limit = 10, sort = 'createdAt', order = 'desc' } = req.query;
+
+            page = Math.max(1, parseInt(page));
+            limit = Math.min(100, Math.max(1, parseInt(limit)));
+
+            const allowedSort = ['createdAt', 'accessCount'];
+            if (!allowedSort.includes(sort)) sort = 'createdAt';
+
+            const sortOrder = order === 'asc' ? 1 : -1;
+
+            const filter = { createdBy: req.user.userId };
+
+            const total = await ShortUrl.countDocuments(filter);
+
+            const data = await ShortUrl.find(filter)
+                .sort({ [sort]: sortOrder })
+                .skip ((page - 1) * limit )
+                .limit(limit);
+
+            return res.status(200).json({
+                data,
+                pagination: {
+                    total,
+                    page,
+                    limit,
+                    totalPages: Math.ceil(total/limit)
+                }
+            });
+        }
+        catch(err){
+            return next(err);
+        }
+
+    }
+
 }
 
 export default ShortUrlController;
