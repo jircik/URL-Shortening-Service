@@ -21,7 +21,7 @@ class AuthController {
 
             const token = jwt.sign({ userId: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '7d'});
 
-            return res.status(201).json({token})
+            return res.status(201).json({ token, userId: user._id, email: user.email })
         } catch (err) {
             if (err.code === 11000) {
                 return res.status(409).json({ message: 'Email already in use' });
@@ -53,7 +53,7 @@ class AuthController {
 
             const token = jwt.sign({ userId: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '7d'});
 
-            return res.status(200).json({token})
+            return res.status(200).json({ token, userId: user._id, email: user.email })
 
         } catch (err) {
             next(err);
