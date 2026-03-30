@@ -4,10 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "npx @opennextjs/cloudflare build",
+    "build": "next build",
+    "pages:build": "npx @opennextjs/cloudflare build",
     "start": "next start",
     "lint": "eslint .",
-    "preview": "npm run build && wrangler pages dev .open-next/assets"
+    "preview": "npm run pages:build && wrangler pages dev .open-next/assets"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
