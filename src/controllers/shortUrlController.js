@@ -29,6 +29,9 @@ class ShortUrlController {
 
             if (shortCode) {
                 finalShortCode = shortCode.trim();
+                if (!/^[a-zA-Z0-9_-]+$/.test(finalShortCode)) {
+                    return res.status(400).json({ message: 'ShortCode can only contain letters, numbers, hyphens and underscores' });
+                }
             } else {
                 finalShortCode = generateShortCode();
             }
@@ -92,7 +95,7 @@ class ShortUrlController {
                 return res.status(410).json({message:"This shortUrl expired"});
             }
 
-            return res.redirect(301, shortUrlDoc.longUrl);
+            return res.redirect(302, shortUrlDoc.longUrl);
 
         } catch (err){
             return next(err);
@@ -195,6 +198,9 @@ class ShortUrlController {
         if (shortCode !== undefined){
             if (typeof shortCode !== 'string' || shortCode.trim() === '') {
                 return res.status(400).json({ message: "ShortCode must be a non-empty string" });
+            }
+            if (!/^[a-zA-Z0-9_-]+$/.test(shortCode.trim())) {
+                return res.status(400).json({ message: 'ShortCode can only contain letters, numbers, hyphens and underscores' });
             }
             updateData.shortCode = shortCode.trim();
         }

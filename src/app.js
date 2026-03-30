@@ -6,6 +6,7 @@ import swaggerSpec from "./config/swagger.js";
 import cors from "cors";
 import rateLimit from "express-rate-limit";
 import { attachUser } from "./middleware/auth.js";
+import helmet from "helmet";
 
 const connection = await connectToDB();
 
@@ -18,6 +19,8 @@ connection.once('open', () => {
 })
 
 const app = express();
+
+app.use(helmet());
 
 const allowedOrigins = process.env.ALLOWED_ORIGINS
     ? process.env.ALLOWED_ORIGINS.split(',') : '*';

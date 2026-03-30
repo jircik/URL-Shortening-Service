@@ -28,6 +28,8 @@ export default function DashboardPage() {
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editValues, setEditValues] = useState({ longUrl: '', shortCode: '' });
     const [isFetching, setIsFetching] = useState(false);
+    const [sort, setSort] = useState<'createdAt' | 'accessCount'>('createdAt');
+    const [order, setOrder] = useState<'asc' | 'desc'>('desc');
 
     useEffect(() => {
         if (!loading && !user) router.push('/login');
@@ -35,12 +37,12 @@ export default function DashboardPage() {
 
     useEffect(() => {
         if (user) fetchUrls(1);
-    }, [user]);
+    }, [user, sort, order]);
 
     async function fetchUrls(page: number) {
         setIsFetching(true);
         try {
-            const res = await apiFetch(`/urls?page=${page}&limit=10&sort=createdAt&order=desc`);
+            const res = await apiFetch(`/urls?page=${page}&limit=10&sort=${sort}&order=${order}`);
             const data = await res.json();
             if (!res.ok) return;
             if (page === 1) {
@@ -102,16 +104,32 @@ export default function DashboardPage() {
             <main className="flex-1 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-12 w-full">
                 <div className="space-y-8">
                     <div className="bg-card border border-border rounded-lg p-8">
-                        <div className="flex items-center justify-between mb-8">
+                        <div className="flex items-center justify-between mb-8 gap-4 flex-wrap">
                             <button className="px-6 py-2 rounded-lg border border-primary text-primary font-mono">
                                 Your URLs
                             </button>
-                            <Link
-                                href="/"
-                                className="px-6 py-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity font-mono font-bold"
-                            >
-                                + Create New
-                            </Link>
+                            <div className="flex items-center gap-2 flex-wrap">
+                                <select
+                                    value={sort}
+                                    onChange={(e) => { setSort(e.target.value as 'createdAt' | 'accessCount'); }}
+                                    className="bg-input border border-border rounded-lg px-3 py-2 text-foreground font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                                >
+                                    <option value="createdAt">Date created</option>
+                                    <option value="accessCount">Access count</option>
+                                </select>
+                                <button
+                                    onClick={() => setOrder((o) => (o === 'asc' ? 'desc' : 'asc'))}
+                                    className="px-3 py-2 rounded-lg border border-border text-foreground hover:bg-muted transition-colors font-mono text-sm"
+                                >
+                                    {order === 'desc' ? '↓ Desc' : '↑ Asc'}
+                                </button>
+                                <Link
+                                    href="/"
+                                    className="px-6 py-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity font-mono font-bold"
+                                >
+                                    + Create New
+                                </Link>
+                            </div>
                         </div>
 
                         <div className="space-y-4">
