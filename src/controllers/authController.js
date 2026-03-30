@@ -61,9 +61,9 @@ class AuthController {
     }
 
     static async me(req, res, next) {
-        const { _id, email, createdAt } = req.user;
+        const { userId, email } = req.user;
 
-        return res.status(200).json({_id, email, createdAt});
+        return res.status(200).json({ userId, email });
     }
 }
 
