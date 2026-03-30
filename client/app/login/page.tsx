@@ -37,7 +37,7 @@ export default function LoginPage() {
 
     return (
         <div className="flex flex-col min-h-screen bg-background">
-            <Header isLoggedIn={false} hideNav />
+            <Header hideNav />
 
             <main className="flex-1 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-12 w-full flex items-center justify-center">
                 <div className="w-full max-w-md">

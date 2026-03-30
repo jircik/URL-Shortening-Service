@@ -97,7 +97,7 @@ export default function DashboardPage() {
 
     return (
         <div className="flex flex-col min-h-screen bg-background">
-            <Header isLoggedIn={true} showHomeLink />
+            <Header showHomeLink />
 
             <main className="flex-1 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-12 w-full">
                 <div className="space-y-8">
