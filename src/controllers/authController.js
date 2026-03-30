@@ -11,6 +11,11 @@ class AuthController {
             return res.status(400).json({message: 'email and password are required'});
         }
 
+        if (password.length < 8 || password.length > 32){
+            return res.status(400).json({message: 'password must be between 8 and 32 characters'});
+        }
+
+
         const hashedPassword = await bcrypt.hash(password, 10);
 
         try {

@@ -40,6 +40,9 @@ export function Header({ hideNav = false, showHomeLink = false }: HeaderProps) {
                 <div className="flex items-center gap-3">
                     {!hideNav && !!user ? (
                         <>
+                            <span className="text-secondary font-mono text-sm hidden sm:block">
+                                {user.email}
+                            </span>
                             {showHomeLink ? (
                                 <Link href="/" className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-foreground hover:bg-muted transition-colors font-mono text-sm">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
