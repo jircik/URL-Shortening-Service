@@ -20,10 +20,14 @@ connection.once('open', () => {
 
 const app = express();
 
+app.set('trust proxy', 1);
+
 app.use(helmet());
 
-const allowedOrigins = process.env.ALLOWED_ORIGINS
-    ? process.env.ALLOWED_ORIGINS.split(',') : '*';
+if (!process.env.ALLOWED_ORIGINS) {
+    throw new Error('ALLOWED_ORIGINS env var is required');
+}
+const allowedOrigins = process.env.ALLOWED_ORIGINS.split(',');
 
 app.use(cors({
     origin: allowedOrigins,

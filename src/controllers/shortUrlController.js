@@ -18,9 +18,12 @@ class ShortUrlController {
         }
 
         try {
-            new URL(longUrl);
+            const parsed = new URL(longUrl);
+            if (!['http:', 'https:'].includes(parsed.protocol)) {
+                return res.status(400).json({ message: 'Only http and https URLs are allowed' });
+            }
         } catch (e) {
-            return res.status(400).json({message: 'The LongUrl is not a valid URL'});
+            return res.status(400).json({ message: 'The LongUrl is not a valid URL' });
         }
 
         try {
@@ -106,7 +109,10 @@ class ShortUrlController {
         const { shortCode } = req.params;
 
         try {
-            const shortUrlDetails = await ShortUrl.findOne({shortCode: shortCode});
+            const shortUrlDetails = await ShortUrl.findOne(
+                { shortCode: shortCode },
+                { createdBy: 0 }
+            );
 
             if (!shortUrlDetails) {
                 return res.status(404).json({message: "Url not found"});
@@ -188,9 +194,12 @@ class ShortUrlController {
                 if (typeof longUrl !== 'string' || longUrl.trim() === '') {
                     return res.status(400).json({ message: "The LongUrl is not a valid URL" });
                 }
-                new URL(longUrl);
+                const parsed = new URL(longUrl);
+                if (!['http:', 'https:'].includes(parsed.protocol)) {
+                    return res.status(400).json({ message: 'Only http and https URLs are allowed' });
+                }
             } catch (e) {
-                return res.status(400).json({message: 'The LongUrl is not a valid URL'});
+                return res.status(400).json({ message: 'The LongUrl is not a valid URL' });
             }
             updateData.longUrl = longUrl;
         }

@@ -1,6 +1,13 @@
 import express from 'express';
 import AuthController from '../controllers/authController.js';
 import { requireAuth } from "../middleware/auth.js";
+import rateLimit from "express-rate-limit";
+
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 10,
+    message: { message: 'Too many attempts, please try again later' },
+});
 
 const routes = express.Router();
 
@@ -57,7 +64,7 @@ const routes = express.Router();
  *             example:
  *               message: Email already in use
  */
-routes.post('/register', AuthController.register);
+routes.post('/register', authLimiter, AuthController.register);
 
 /**
  * @openapi
@@ -112,7 +119,7 @@ routes.post('/register', AuthController.register);
  *             example:
  *               message: invalid credentials
  */
-routes.post('/login', AuthController.login);
+routes.post('/login', authLimiter, AuthController.login);
 
 /**
  * @openapi
